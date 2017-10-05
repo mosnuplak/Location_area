@@ -25,6 +25,7 @@ public class GPS_service extends Service {
     private LocationManager locationManager;
     LocationManager mLocationManager = null;
     GPSTracker myGPSTracker;
+
     long minTime = 10000;
     float minDistance = 1;
 
@@ -88,7 +89,19 @@ public class GPS_service extends Service {
     private class GPSTracker implements android.location.LocationListener{
         @Override
         public void onLocationChanged(Location location) {
-            showNotification(location);
+            String latitude = Double.toString(location.getLatitude());
+            String longitude = Double.toString(location.getLongitude());
+            Double latitudeSJ = 13.8092349;
+            Double longitudeSJ = 100.55937;
+            Double latitudeSunPlaza = 13.8072369;
+            Double longitudeSunPlaza = 100.5576056;
+            if(distance(location.getLatitude(),location.getLongitude(),latitudeSJ,longitudeSJ) < 0.1) {
+                showNotification(location, distance(location.getLatitude(), location.getLongitude(), latitudeSJ, longitudeSJ),"SJ");
+            }else if(distance(location.getLatitude(),location.getLongitude(),latitudeSunPlaza,longitudeSunPlaza) < 0.1){
+                showNotification(location, distance(location.getLatitude(), location.getLongitude(), latitudeSunPlaza, longitudeSunPlaza),"SunPlaza");
+            }else{
+                Toast.makeText(getApplication(), "อยู่ไหนวะเนี่ย longti : "+longitude+" , lati : "+latitude, Toast.LENGTH_LONG).show();
+            }
         }
 
         @Override
@@ -105,15 +118,37 @@ public class GPS_service extends Service {
         public void onStatusChanged(String provider, int status, Bundle extras) {
 
         }
+        private double distance(double lat1, double lon1, double lat2, double lon2) {
+            double theta = lon1 - lon2;
+            double dist = Math.sin(deg2rad(lat1))
+                    * Math.sin(deg2rad(lat2))
+                    + Math.cos(deg2rad(lat1))
+                    * Math.cos(deg2rad(lat2))
+                    * Math.cos(deg2rad(theta));
+            dist = Math.acos(dist);
+            dist = rad2deg(dist);
+            dist = dist * 60 * 1.1515;
+            return (dist);
+        }
+
+        private double deg2rad(double deg) {
+            return (deg * Math.PI / 180.0);
+        }
+
+        private double rad2deg(double rad) {
+            return (rad * 180.0 / Math.PI);
+        }
+
     }
-    private void showNotification(Location location) {
+    private void showNotification(Location location, double distance,String namePlase) {
+        String dis = String.format("%.2f", distance);
         String latitude = Double.toString(location.getLatitude());
         String longitude = Double.toString(location.getLongitude());
         Notification notification =
                 new NotificationCompat.Builder(this) // this is context
                         .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle("อยู่ที่ไหนซักแห่งบนโลกนี้แหละ")
-                        .setContentText(latitude+"aaa"+longitude)
+                        .setContentTitle("คุณอยู่ในบริเวณของ"+namePlase)
+                        .setContentText(dis+"กิโลเมตร")
                         .setAutoCancel(true)
                         .build();
         NotificationManager notificationManager =
