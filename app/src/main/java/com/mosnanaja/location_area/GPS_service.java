@@ -21,11 +21,12 @@ import android.widget.Toast;
 
 public class GPS_service extends Service {
 
+    String id = "1";
     private LocationListener listener;
     private LocationManager locationManager;
     LocationManager mLocationManager = null;
     GPSTracker myGPSTracker;
-
+    private int inPlase = 0;
     long minTime = 10000;
     float minDistance = 1;
 
@@ -95,11 +96,29 @@ public class GPS_service extends Service {
             Double longitudeSJ = 100.55937;
             Double latitudeSunPlaza = 13.8072369;
             Double longitudeSunPlaza = 100.5576056;
-            if(distance(location.getLatitude(),location.getLongitude(),latitudeSJ,longitudeSJ) < 0.1) {
+            Double latitudeSeven = 13.807967;
+            Double longitudeSeven = 100.5585668;
+            Double latitudeNomTo = 13.7782508;
+            Double longitudeNomTo=100.5580033;
+            Double latitudeATM = 13.7774774;
+            Double longitudeATM = 100.5596104;
+            if(distance(location.getLatitude(),location.getLongitude(),latitudeSJ,longitudeSJ) < 0.1 && inPlase == 0) {
+                inPlase = 1;
                 showNotification(location, distance(location.getLatitude(), location.getLongitude(), latitudeSJ, longitudeSJ),"SJ");
-            }else if(distance(location.getLatitude(),location.getLongitude(),latitudeSunPlaza,longitudeSunPlaza) < 0.1){
+            }else if(distance(location.getLatitude(),location.getLongitude(),latitudeSunPlaza,longitudeSunPlaza) < 0.1 && inPlase == 0){
+                inPlase = 1;
                 showNotification(location, distance(location.getLatitude(), location.getLongitude(), latitudeSunPlaza, longitudeSunPlaza),"SunPlaza");
+            }else if(distance(location.getLatitude(),location.getLongitude(),latitudeSeven,longitudeSeven) < 0.1 && inPlase == 0){
+                inPlase = 1;
+                showNotification(location, distance(location.getLatitude(), location.getLongitude(), latitudeSeven, longitudeSeven),"Seven เฉยเพวง");
+            }else if(distance(location.getLatitude(),location.getLongitude(),latitudeNomTo,longitudeNomTo) < 0.1 && inPlase == 0){
+                inPlase = 1;
+                showNotification(location, distance(location.getLatitude(), location.getLongitude(), latitudeNomTo, longitudeNomTo),"ร้านนมตโต");
+            }else if(distance(location.getLatitude(),location.getLongitude(),latitudeATM,longitudeATM) < 0.1 && inPlase == 0){
+                inPlase = 1;
+                showNotification(location, distance(location.getLatitude(), location.getLongitude(), latitudeATM, longitudeATM),"ATM หอการค้า");
             }else{
+                inPlase = 0;
                 Toast.makeText(getApplication(), "อยู่ไหนวะเนี่ย longti : "+longitude+" , lati : "+latitude, Toast.LENGTH_LONG).show();
             }
         }
@@ -141,6 +160,7 @@ public class GPS_service extends Service {
 
     }
     private void showNotification(Location location, double distance,String namePlase) {
+        //String id = "1";
         String dis = String.format("%.2f", distance);
         String latitude = Double.toString(location.getLatitude());
         String longitude = Double.toString(location.getLongitude());
@@ -150,10 +170,14 @@ public class GPS_service extends Service {
                         .setContentTitle("คุณอยู่ในบริเวณของ"+namePlase)
                         .setContentText(dis+"กิโลเมตร")
                         .setAutoCancel(true)
+                        .setChannel(id)
                         .build();
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.notify(1000, notification);
+        int  numId = Integer.parseInt(id);
+        numId++;
+        id = numId+"";
     }
 }
 
