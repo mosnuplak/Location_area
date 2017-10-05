@@ -8,7 +8,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
+
 
     Button start, stop;
     TextView text;
@@ -19,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
         start = (Button)findViewById(R.id.btnStart);
         stop = (Button)findViewById(R.id.btnStop);
         text = (TextView)findViewById(R.id.textView);
-
+        //addPlase();
         Double latitudeSJ = 13.8092349;
         Double longitudeSJ = 100.55937;
         Double latitudeSunPlaza = 13.8072369;
@@ -40,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+
     private double distance(double lat1, double lon1, double lat2, double lon2) {
         double theta = lon1 - lon2;
         double dist = Math.sin(deg2rad(lat1))

@@ -15,6 +15,9 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by MSI on 3/10/2560.
  */
@@ -26,9 +29,10 @@ public class GPS_service extends Service {
     private LocationManager locationManager;
     LocationManager mLocationManager = null;
     GPSTracker myGPSTracker;
-    private int inPlase = 0;
+    private String inPlase = "";
     long minTime = 10000;
     float minDistance = 1;
+    private List<PlaseDao> plaseList;
 
     @Nullable
     @Override
@@ -39,6 +43,7 @@ public class GPS_service extends Service {
     @Override
     public void onCreate() {
         Toast.makeText(getApplication(), "Start Service!", Toast.LENGTH_LONG).show();
+        addPlase();
         myGPSTracker = new GPSTracker();
 
         listener = new LocationListener() {
@@ -78,6 +83,15 @@ public class GPS_service extends Service {
 
     }
 
+    private void addPlase() {
+        plaseList = new ArrayList<>();
+        plaseList.add(new PlaseDao(13.8092349,100.55937,"SJ",0.05));
+        plaseList.add(new PlaseDao(13.8072369,100.5576056,"SunPlaza",0.05));
+        plaseList.add(new PlaseDao(13.807967,100.5585668,"Sevenเฉยพวง",0.05));
+        plaseList.add(new PlaseDao(13.7782508,100.5580033,"NoTom",0.05));
+        plaseList.add(new PlaseDao(13.7774774,100.5596104,"ATM มอหอการค้า",0.05));
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -88,39 +102,23 @@ public class GPS_service extends Service {
         }
     }
     private class GPSTracker implements android.location.LocationListener{
+
         @Override
         public void onLocationChanged(Location location) {
-            String latitude = Double.toString(location.getLatitude());
-            String longitude = Double.toString(location.getLongitude());
-            Double latitudeSJ = 13.8092349;
-            Double longitudeSJ = 100.55937;
-            Double latitudeSunPlaza = 13.8072369;
-            Double longitudeSunPlaza = 100.5576056;
-            Double latitudeSeven = 13.807967;
-            Double longitudeSeven = 100.5585668;
-            Double latitudeNomTo = 13.7782508;
-            Double longitudeNomTo=100.5580033;
-            Double latitudeATM = 13.7774774;
-            Double longitudeATM = 100.5596104;
-            if(distance(location.getLatitude(),location.getLongitude(),latitudeSJ,longitudeSJ) < 0.1 && inPlase == 0) {
-                inPlase = 1;
-                showNotification(location, distance(location.getLatitude(), location.getLongitude(), latitudeSJ, longitudeSJ),"SJ");
-            }else if(distance(location.getLatitude(),location.getLongitude(),latitudeSunPlaza,longitudeSunPlaza) < 0.1 && inPlase == 0){
-                inPlase = 1;
-                showNotification(location, distance(location.getLatitude(), location.getLongitude(), latitudeSunPlaza, longitudeSunPlaza),"SunPlaza");
-            }else if(distance(location.getLatitude(),location.getLongitude(),latitudeSeven,longitudeSeven) < 0.1 && inPlase == 0){
-                inPlase = 1;
-                showNotification(location, distance(location.getLatitude(), location.getLongitude(), latitudeSeven, longitudeSeven),"Seven เฉยเพวง");
-            }else if(distance(location.getLatitude(),location.getLongitude(),latitudeNomTo,longitudeNomTo) < 0.1 && inPlase == 0){
-                inPlase = 1;
-                showNotification(location, distance(location.getLatitude(), location.getLongitude(), latitudeNomTo, longitudeNomTo),"ร้านนมตโต");
-            }else if(distance(location.getLatitude(),location.getLongitude(),latitudeATM,longitudeATM) < 0.1 && inPlase == 0){
-                inPlase = 1;
-                showNotification(location, distance(location.getLatitude(), location.getLongitude(), latitudeATM, longitudeATM),"ATM หอการค้า");
-            }else{
-                inPlase = 0;
-                Toast.makeText(getApplication(), "อยู่ไหนวะเนี่ย longti : "+longitude+" , lati : "+latitude, Toast.LENGTH_LONG).show();
+
+            for(int i = 0; i < plaseList.size() ; i++){
+                double distance = distance(location.getLatitude(),location.getLongitude(),plaseList.get(i).getLatitude(),plaseList.get(i).getLongitude());
+                if( distance <= plaseList.get(i).getDistance()){
+                    if(plaseList.get(i).getName() == inPlase){
+                       //plaseList.remove(i);
+                        break;
+                    }else{
+                        inPlase = plaseList.get(i).getName();
+                        showNotification(location,distance,plaseList.get(i).getName());
+                    }
+                }
             }
+
         }
 
         @Override
@@ -178,6 +176,54 @@ public class GPS_service extends Service {
         int  numId = Integer.parseInt(id);
         numId++;
         id = numId+"";
+    }
+
+    public class PlaseDao {
+        private Double latitude;
+        private Double longitude;
+        private String name;
+        private Double distance;
+
+        public PlaseDao(Double latitude,Double longitude,String name,Double distance){
+            this.latitude = latitude;
+            this.longitude = longitude;
+            this.name = name;
+            this.distance = distance;
+        }
+
+        public Double getLatitude() {
+            return latitude;
+        }
+
+        public void setLatitude(Double latitude) {
+            this.latitude = latitude;
+        }
+
+        public Double getLongitude() {
+            return longitude;
+        }
+
+        public void setLongitude(Double longitude) {
+            this.longitude = longitude;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Double getDistance() {
+            return distance;
+        }
+
+        public void setDistance(Double distance) {
+            this.distance = distance;
+        }
+
+
     }
 }
 
